@@ -16,6 +16,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="images/logo-las-chilenas-vector.svg" type="image/svg+xml" sizes="any">
 </head>
 <body class="page-about">
 
@@ -33,23 +34,23 @@
         <span class="menu-toggle__bar" aria-hidden="true"></span>
       </button>
     </div>
-
-    <div class="nav-backdrop" aria-hidden="true"></div>
-
-    <nav id="main-nav" class="main-nav" aria-label="Main navigation">
-      <a href="menu.html">Menu</a>
-      <a href="about.html" aria-current="page">Our Story</a>
-      <div class="nav-dropdown">
-        <button type="button" class="nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true">Order Online</button>
-        <ul class="nav-dropdown__menu" role="menu">
-          <li role="none"><a href="https://www.doordash.com/store/36217389?utm_source=mx_share" role="menuitem" target="_blank" rel="noopener noreferrer">DoorDash</a></li>
-          <li role="none"><a href="https://www.ubereats.com/store/las-chilenas-la-vista/IOowGbUzXh-drGN0BZdOHw?diningMode=DELIVERY&amp;surfaceName=" role="menuitem" target="_blank" rel="noopener noreferrer">Uber Eats</a></li>
-          <li role="none"><a href="https://order.toasttab.com/online/las-chilenas-llc-8064-south-84th-street" role="menuitem" target="_blank" rel="noopener noreferrer">Pick up in store</a></li>
-        </ul>
-      </div>
-      <a href="visit-us.html">Visit</a>
-    </nav>
   </header>
+
+  <div class="nav-backdrop" aria-hidden="true"></div>
+
+  <nav id="main-nav" class="main-nav" aria-label="Main navigation">
+    <a href="menu.html">Menu</a>
+    <a href="about.html" aria-current="page">Our Story</a>
+    <div class="nav-dropdown">
+      <button type="button" class="nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true">Order Online</button>
+      <ul class="nav-dropdown__menu" role="menu">
+        <li role="none"><a href="https://www.doordash.com/store/36217389?utm_source=mx_share" role="menuitem" target="_blank" rel="noopener noreferrer">DoorDash</a></li>
+        <li role="none"><a href="https://www.ubereats.com/store/las-chilenas-la-vista/IOowGbUzXh-drGN0BZdOHw?diningMode=DELIVERY&amp;surfaceName=" role="menuitem" target="_blank" rel="noopener noreferrer">Uber Eats</a></li>
+        <li role="none"><a href="https://order.toasttab.com/online/las-chilenas-llc-8064-south-84th-street" role="menuitem" target="_blank" rel="noopener noreferrer">Pick up in store</a></li>
+      </ul>
+    </div>
+    <a href="visit-us.html">Visit</a>
+  </nav>
 
   <main id="main">
     <article class="about-story">
@@ -242,10 +243,17 @@
       <nav class="footer-nav" aria-label="Footer navigation">
         <a href="menu.html">Menu</a>
         <a href="about.html" aria-current="page">Our Story</a>
-        <a href="index.html#gallery">Gallery</a>
+        <div class="nav-dropdown">
+          <button type="button" class="nav-dropdown__trigger" aria-expanded="false" aria-haspopup="true">Order Online</button>
+          <ul class="nav-dropdown__menu" role="menu">
+            <li role="none"><a href="https://www.doordash.com/store/36217389?utm_source=mx_share" role="menuitem" target="_blank" rel="noopener noreferrer">DoorDash</a></li>
+            <li role="none"><a href="https://www.ubereats.com/store/las-chilenas-la-vista/IOowGbUzXh-drGN0BZdOHw?diningMode=DELIVERY&amp;surfaceName=" role="menuitem" target="_blank" rel="noopener noreferrer">Uber Eats</a></li>
+            <li role="none"><a href="https://order.toasttab.com/online/las-chilenas-llc-8064-south-84th-street" role="menuitem" target="_blank" rel="noopener noreferrer">Pick up in store</a></li>
+          </ul>
+        </div>
         <a href="visit-us.html">Visit</a>
       </nav>
-      <p class="footer-copy">&copy; 2026 Las Chilenas, LLC</p>
+      <p class="footer-copy">&copy; 2026 Las Chilenas, LLC. Designed by <a href="https://452digitalco.com" target="_blank" rel="noopener noreferrer">452 Digital Co.</a></p>
     </div>
   </footer>
 
@@ -305,18 +313,33 @@
 
     const initAutoMarquee = (root) => {
       const track = root.querySelector('.auto-marquee__track');
-      const group = root.querySelector('.auto-marquee__group');
-      if (!track || !group) return;
+      const viewport = root.querySelector('.auto-marquee__viewport');
+      const group = track?.querySelector('.auto-marquee__group:not([aria-hidden="true"])');
+      if (!track || !group || !viewport) return;
 
       const isReverse = root.hasAttribute('data-auto-marquee-reverse');
 
-      const ensureClone = () => {
-        if (!track.querySelector('.auto-marquee__group[aria-hidden="true"]')) {
+      const ensureClones = () => {
+        track.querySelectorAll('.auto-marquee__group[aria-hidden="true"]').forEach((el) => el.remove());
+
+        const groupWidth = group.getBoundingClientRect().width;
+        if (groupWidth <= 0) return 0;
+
+        const gap = parseFloat(getComputedStyle(track).gap) || 0;
+        const viewportWidth = viewport.getBoundingClientRect().width;
+        const minGroups = Math.max(
+          2,
+          Math.ceil((viewportWidth + groupWidth) / (groupWidth + gap))
+        );
+
+        while (track.querySelectorAll('.auto-marquee__group').length < minGroups) {
           const clone = group.cloneNode(true);
           clone.setAttribute('aria-hidden', 'true');
           clone.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
           track.appendChild(clone);
         }
+
+        return groupWidth;
       };
 
       const sync = () => {
@@ -327,21 +350,29 @@
           return;
         }
 
-        ensureClone();
+        const groupWidth = ensureClones();
+        if (!groupWidth) return;
 
-        const width = group.getBoundingClientRect().width;
         const gap = parseFloat(getComputedStyle(track).gap) || 0;
-        const shift = width + gap;
+        const shift = groupWidth + gap;
 
         track.style.setProperty('--marquee-shift', `${shift}px`);
         track.style.animationDuration = `${Math.max(28, shift / 35)}s`;
         track.classList.toggle('is-reverse', isReverse);
+        track.classList.remove('is-playing');
+        void track.offsetWidth;
         track.classList.add('is-playing');
       };
 
       sync();
       reducedMotion.addEventListener('change', sync);
       window.addEventListener('resize', sync);
+
+      if (typeof ResizeObserver !== 'undefined') {
+        const resizeObserver = new ResizeObserver(sync);
+        resizeObserver.observe(group);
+        resizeObserver.observe(viewport);
+      }
 
       group.querySelectorAll('img').forEach((img) => {
         if (!img.complete) {
